@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\03 - Application\IMDb.Application\IMDb.Application.csproj" />
+    <ProjectReference Include="..\..\04 - Domain\IMDb.Domain\IMDb.Domain.csproj" />
+    <ProjectReference Include="..\IMDb.Infra.Data\IMDb.Infra.Data.csproj" />
+  </ItemGroup>
+
+</Project>
