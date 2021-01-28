@@ -4,48 +4,26 @@ using IMDb.Application.Services;
 using IMDb.Domain.Interfaces.Repositories;
 using IMDb.Domain.Interfaces.Services;
 using IMDb.Domain.Services;
+using IMDb.Infra.Data.Repositorys;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IMDb.Infra.IoC
 {
-    public class DependencyInjector
+    public static class ServicesDependency
     {
-
-        public static void Load(ContainerBuilder builder)
+        public static void AddServiceDependency(IServiceCollection services)
         {
             //App
-            builder.RegisterType<ApplicationServiceMovie>().As<IApplicationServiceMovie>();
-            builder.RegisterType<ApplicationServiceUser>().As<IApplicationServiceUser>();
+            services.AddScoped<IApplicationServiceMovie, ApplicationServiceMovie>();
+            services.AddScoped<IApplicationServiceUser, ApplicationServiceUser>();
 
             //Service
-            builder.RegisterType<ApplicationServiceMovie>().As<IApplicationServiceMovie>();
-            builder.RegisterType<ApplicationServiceUser>().As<IApplicationServiceUser>();
+            services.AddScoped<IApplicationServiceMovie, ApplicationServiceMovie>();
+            services.AddScoped<IApplicationServiceUser, ApplicationServiceUser>();
 
             //Repository
-            builder.RegisterType<RepositoryMovie>().As<IRepositoryMovie>();
-            builder.RegisterType<RepositoryUser>().As<IRepositoryUser>();
-
+            services.AddScoped<IRepositoryMovie, RepositoryMovie>();
+            services.AddScoped<IRepositoryUser, RepositoryUser>();
+            }
         }
-
-
-
-        public static void Register(IServiceCollection svcCollection)
-        {
-            //Application
-            svcCollection.AddScoped(typeof(iAPPP<>), typeof(BaseApp<>));
-           // svcCollection.AddScoped<IMovieApp, MovieApp>();
-            //svcCollection.AddScoped<IUserService, UserService>();
-
-            //Domain
-            svcCollection.AddScoped(typeof(IServiceBase<>), typeof(ServiceBase<>));
-            //svcCollection.AddScoped<IMovieService, MovieService>();
-            //svcCollection.AddScoped<IUserService, UserService>();
-
-
-            //Repository
-            svcCollection.AddScoped(typeof(BaseRepository<>), typeof(BaseRepository<>));
-            //svcCollection.AddScoped<IMovieRepository, MovieRepository>();
-        }
-
     }
-}

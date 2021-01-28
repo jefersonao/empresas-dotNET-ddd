@@ -1,20 +1,26 @@
 ﻿using IMDb.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Domain.Entities
 {
     public class Movie : Base
-    {     
+    {
+        [MaxLength(60)]
         public string Name { get; set; }
+        [MaxLength(60)]
         public string Director { get; set; }
+        [MaxLength(1000)]
         public string Sinopse { get; set; }
         public int Year { get; set; }
+        [MaxLength(60)]
         public string UrlTrailer { get; set; }
-        public List<string> urlImages { get; set; }
-        public List<MovieGenre> Genres { get; set; }
-        public List<Actor> Actors { get; set; }
+
+        public string urlImage { get; set; }
+        public virtual List<MovieGenre> Genres { get; set; }
+        public virtual List<Actor> Actors { get; set; }
 
         public bool isDeleted { get; set; }
 
