@@ -19,12 +19,9 @@ namespace Domain.Entities
 
         [MaxLength(60)]
         public string Password { get; set; }
-
-        [MaxLength(60)]
+                 
         public bool isDeleted { get; set; }
-
-        [MaxLength(60)]
+                 
         public bool isAdmin { get; set; }
-
     }
 }

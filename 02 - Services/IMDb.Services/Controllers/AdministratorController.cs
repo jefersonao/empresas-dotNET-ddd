@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using IMDb.Infra.Data.Context;
 
 namespace IMDb.API.Controllers
 {
-    public class AdministratorController : Controller
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AdministratorController : ControllerBase
     {
         private readonly DB _context;
 
@@ -18,136 +21,111 @@ namespace IMDb.API.Controllers
         {
             _context = context;
         }
-
-        // GET: Administrator
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.users.ToListAsync());
-        }
-
-        // GET: Administrator/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // GET: Administrator/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Administrator/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+ 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Lastname,Email,Password,isDeleted,isAdmin,Id")] User user)
+        //[Route("Cadastro")]
+        public async Task<ActionResult<User>> PostAdmin(User admin)
         {
-            if (ModelState.IsValid)
+
+            try
             {
-                _context.Add(user);
+
+                admin.isAdmin = true;
+                _context.users.Add(admin);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                return CreatedAtAction("GetUser", new { id = admin.Id }, admin);
+
             }
-            return View(user);
+            catch (Exception e)
+            {
+                var t = e;
+                return BadRequest(e);
+            }
+
+
         }
 
-        // GET: Administrator/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        // [HttpPut("{id}")]
+        [HttpPut]
+        [Route("Edição")]
+        public async Task<IActionResult> PutAdmin(int id, User admin)
         {
-            if (id == null)
+            if (id != admin.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
+            _context.Entry(admin).State = EntityState.Modified;
+            admin.isAdmin = true;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AdminExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Somente Deleção Lógica
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [HttpPut]
+        [Route("DesativarAdmin")]
+        public async Task<ActionResult<User>> DeleteUser(int id)
+        {
             var user = await _context.users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
-            return View(user);
-        }
 
-        // POST: Administrator/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Lastname,Email,Password,isDeleted,isAdmin,Id")] User user)
-        {
-            if (id != user.Id)
-            {
-                return NotFound();
-            }
+            _context.Entry(user).State = EntityState.Modified;
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
-        }
-
-        // GET: Administrator/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Administrator/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var user = await _context.users.FindAsync(id);
-            _context.users.Remove(user);
+            user.isDeleted = true;
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return user;
         }
 
-        private bool UserExists(int id)
+        private bool AdminExists(int id)
         {
             return _context.users.Any(e => e.Id == id);
         }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [HttpGet]
+        [Route("ObterUsuariosNaoAdminAtivos")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsersNoAdmin()
+        {
+            return await _context.users.Where(u => u.isAdmin == false && u.isDeleted == false).ToListAsync();
+        }
+
+
     }
 }
